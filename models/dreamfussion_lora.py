@@ -3,7 +3,6 @@ import torch.nn as nn
 
 from diffusers import (AutoencoderKL, DDPMScheduler, UNet2DConditionModel,
                        StableDiffusionPipeline)
-from transformers import CLIPTextModel, CLIPTokenizer
 from diffusers.models.attention_processor import (
     AttnAddedKVProcessor,
     AttnAddedKVProcessor2_0,
@@ -17,12 +16,39 @@ from packaging import version
 from diffusers.loaders import AttnProcsLayers
 import torch.nn.functional as F
 from diffusers.utils import TEXT_ENCODER_TARGET_MODULES
+from transformers import AutoTokenizer, PretrainedConfig
+
+
+def import_model_class_from_model_name_or_path(
+        pretrained_model_name_or_path: str, revision: str):
+    text_encoder_config = PretrainedConfig.from_pretrained(
+        pretrained_model_name_or_path,
+        subfolder="text_encoder",
+        revision=revision,
+    )
+    model_class = text_encoder_config.architectures[0]
+
+    if model_class == "CLIPTextModel":
+        from transformers import CLIPTextModel
+
+        return CLIPTextModel
+    elif model_class == "RobertaSeriesModelWithTransformation":
+        from diffusers.pipelines.alt_diffusion.modeling_roberta_series import RobertaSeriesModelWithTransformation  # noqa
+
+        return RobertaSeriesModelWithTransformation
+    elif model_class == "T5EncoderModel":
+        from transformers import T5EncoderModel
+
+        return T5EncoderModel
+    else:
+        raise ValueError(f"{model_class} is not supported.")
 
 
 class DreamDiffusionLoRA(nn.Module):
     """Dream Diffusion Model with LoRA.
 
     Args:
+        tokenizer_name (str): Name of tokenizer.
         pretrained_model_name_or_path (str): Path to pretrained model or model
             identifier from huggingface.co/models.
         enable_xformers_memory_efficient_attention (bool, optional): Whether to
@@ -36,6 +62,7 @@ class DreamDiffusionLoRA(nn.Module):
     """
 
     def __init__(self,
+                 tokenizer_name: str,
                  pretrained_model_name_or_path: str,
                  enable_xformers_memory_efficient_attention: bool = False,
                  train_text_encoder: bool = False,
@@ -47,11 +74,20 @@ class DreamDiffusionLoRA(nn.Module):
 
         self.noise_scheduler = DDPMScheduler.from_pretrained(
             pretrained_model_name_or_path, subfolder="scheduler")
-        self.tokenizer = CLIPTokenizer.from_pretrained(
-            pretrained_model_name_or_path,
-            subfolder="tokenizer",
-            revision=revision)
-        self.text_encoder = CLIPTextModel.from_pretrained(
+        if tokenizer_name:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                tokenizer_name, revision=revision, use_fast=False)
+        elif pretrained_model_name_or_path:
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                pretrained_model_name_or_path,
+                subfolder="tokenizer",
+                revision=revision,
+                use_fast=False,
+            )
+            # import correct text encoder class
+        text_encoder_cls = import_model_class_from_model_name_or_path(
+            pretrained_model_name_or_path, revision)
+        self.text_encoder = text_encoder_cls.from_pretrained(
             pretrained_model_name_or_path,
             subfolder="text_encoder",
             revision=revision)
@@ -226,6 +262,15 @@ class DreamDiffusionLoRA(nn.Module):
             raise ValueError(
                 "xformers is not available. Make sure it is installed correctly"  # noqa
             )
+
+    def _get_tokenizer(self):
+        """Return tokenizer"""
+        return self.tokenizer
+
+    def _del_tokenizer_text_encoder(self):
+        """Delete tokenizer and text encoder."""
+        del self.tokenizer
+        del self.text_encoder
 
 
 if __name__ == '__main__':

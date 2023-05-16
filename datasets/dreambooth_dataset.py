@@ -3,37 +3,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
 from pathlib import Path
-
-
-def tokenize_prompt(tokenizer,
-                    prompt: str,
-                    tokenizer_max_length: int = None) -> dict:
-    """Tokenize the prompt text with the tokenizer.
-
-    Args:
-        tokenizer (transformers.PreTrainedTokenizer): The tokenizer to be used
-            for tokenizing the prompts.
-        prompt (str): The prompt text.
-        tokenizer_max_length (int, optional): The maximum length of the
-            tokenizer. Defaults to None.
-
-    Returns:
-        dict: A dictionary containing the tokenized prompt text.
-    """
-    if tokenizer_max_length is not None:
-        max_length = tokenizer_max_length
-    else:
-        max_length = tokenizer.model_max_length
-
-    text_inputs = tokenizer(
-        prompt,
-        truncation=True,
-        padding="max_length",
-        max_length=max_length,
-        return_tensors="pt",
-    )
-
-    return text_inputs
+from utils import tokenize_prompt
 
 
 class DreamBoothDataset(Dataset):
@@ -63,10 +33,10 @@ class DreamBoothDataset(Dataset):
             training. Defaults to 512.
         center_crop (bool, optional): Whether to use center crop or random
             crop. Defaults to False.
-        encoder_hidden_states (torch.Tensor, optional): The id of the prombt
-            text for the instance. If not provided, it will be generated with
-            the tokenizer. Defaults to None.
-        instance_prompt_encoder_hidden_states (torch.Tensor, optional): The
+        instance_prompt_encoder_hidden_states (torch.Tensor, optional): The id
+            of the prombt text for the instance. If not provided, it will be
+            generated with the tokenizer. Defaults to None.
+        class_prompt_encoder_hidden_states (torch.Tensor, optional): The
             embedding of the prompt text for the instance. If not provided, it
             will be generated with the tokenizer. Defaults to None.
         tokenizer_max_length (int, optional): The maximum length of the
@@ -83,15 +53,15 @@ class DreamBoothDataset(Dataset):
         class_num: int = 100,
         img_size: int = 512,
         center_crop: bool = False,
-        encoder_hidden_states: torch.Tensor = None,
         instance_prompt_encoder_hidden_states: torch.Tensor = None,
+        class_prompt_encoder_hidden_states: torch.Tensor = None,
         tokenizer_max_length: int = None,
     ) -> None:
         self.img_size = img_size
         self.center_crop = center_crop
         self.tokenizer = tokenizer
-        self.encoder_hidden_states = encoder_hidden_states
         self.instance_prompt_encoder_hidden_states = instance_prompt_encoder_hidden_states  # noqa
+        self.class_prompt_encoder_hidden_states = class_prompt_encoder_hidden_states  # noqa
         self.tokenizer_max_length = tokenizer_max_length
 
         self.instance_data_root = Path(instance_data_root)
@@ -137,8 +107,9 @@ class DreamBoothDataset(Dataset):
             instance_image = instance_image.convert("RGB")
         example["instance_images"] = self.image_transforms(instance_image)
 
-        if self.encoder_hidden_states is not None:
-            example["instance_prompt_ids"] = self.encoder_hidden_states
+        if self.instance_prompt_encoder_hidden_states is not None:
+            example[
+                "instance_prompt_ids"] = self.instance_prompt_encoder_hidden_states  # noqa
         else:
             text_inputs = tokenize_prompt(
                 self.tokenizer,
@@ -154,9 +125,9 @@ class DreamBoothDataset(Dataset):
                 class_image = class_image.convert("RGB")
             example["class_images"] = self.image_transforms(class_image)
 
-            if self.instance_prompt_encoder_hidden_states is not None:
+            if self.class_prompt_encoder_hidden_states is not None:
                 example[
-                    "class_prompt_ids"] = self.instance_prompt_encoder_hidden_states  # noqa
+                    "class_prompt_ids"] = self.class_prompt_encoder_hidden_states  # noqa
             else:
                 class_text_inputs = tokenize_prompt(
                     self.tokenizer,
@@ -167,3 +138,52 @@ class DreamBoothDataset(Dataset):
                     "class_attention_mask"] = class_text_inputs.attention_mask
 
         return example
+
+
+class DB_collate_fn(object):
+    """Collate function for DreamBoothDataset
+
+    Args:
+        with_prior_preservation (bool, optional): Whether to compute
+            prior_preservation loss. Defaults to False.
+    """
+
+    def __init__(self, with_prior_preservation: bool = False) -> None:
+        self.with_prior_preservation = with_prior_preservation
+
+    def __call__(self, examples):
+        has_attention_mask = "instance_attention_mask" in examples[0]
+
+        input_ids = [example["instance_prompt_ids"] for example in examples]
+        pixel_values = [example["instance_images"] for example in examples]
+
+        if has_attention_mask:
+            attention_mask = [
+                example["instance_attention_mask"] for example in examples
+            ]
+
+        # Concat class and instance examples for prior preservation.
+        # We do this to avoid doing two forward passes.
+        if self.with_prior_preservation:
+            input_ids += [example["class_prompt_ids"] for example in examples]
+            pixel_values += [example["class_images"] for example in examples]
+            if has_attention_mask:
+                attention_mask += [
+                    example["class_attention_mask"] for example in examples
+                ]
+
+        pixel_values = torch.stack(pixel_values)
+        pixel_values = pixel_values.to(
+            memory_format=torch.contiguous_format).float()
+
+        input_ids = torch.cat(input_ids, dim=0)
+
+        batch = {
+            "input_ids": input_ids,
+            "pixel_values": pixel_values,
+        }
+
+        if has_attention_mask:
+            batch["attention_mask"] = attention_mask
+
+        return batch
