@@ -188,7 +188,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default='A selfie of jianqging person as the joker from the dark knight',
+        default=
+        'A selfie of jianqging person as the joker from the dark knight',
         # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
@@ -295,7 +296,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=100,
+        default=1,
         help=  # noqa
         (
             "Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"  # noqa
@@ -1175,7 +1176,6 @@ def main(args):
         num_cycles=args.lr_num_cycles,
         power=args.lr_power,
     )
-
     # Prepare everything with our `accelerator`.
     if args.train_text_encoder:
         unet_lora_layers, text_encoder_lora_layers, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
@@ -1425,9 +1425,7 @@ def main(args):
                     for _ in range(args.num_validation_images)
                 ]
                 for i, img in enumerate(images):
-                    img.save(
-                        f"{args.output_dir}/epoch_{epoch}_{i}.png",
-                        "PNG")
+                    img.save(f"{args.output_dir}/epoch_{epoch}_{i}.png", "PNG")
 
                 for tracker in accelerator.trackers:
                     if tracker.name == "tensorboard":

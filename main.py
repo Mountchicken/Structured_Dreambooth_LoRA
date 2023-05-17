@@ -79,7 +79,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default='A selfie of a jianqging man',
+        default='A selfie of a man',
         # default=None,
         help=  # noqa
         "The prompt to specify images in the same class as provided instance images.",  # noqa
@@ -87,7 +87,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default='A selfie of an asia man',
+        default='A selfie of a jianqging man',
         # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
@@ -102,7 +102,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_epochs",
         type=int,
-        default=10,
+        default=1,
         help=  # noqa
         (
             "Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"  # noqa
@@ -124,8 +124,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--num_class_images",
         type=int,
-        # default=100,
-        default=20,  # TODO
+        default=100,
         help=  # noqa
         (
             "Minimal class images for prior preservation loss. If there are not enough images already present in"  # noqa
@@ -187,14 +186,14 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=500,
+        default=800,
         help=  # noqa
         "Total number of training steps to perform.  If provided, overrides num_train_epochs.",  # noqa
     )
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=1,
+        default=200,
         help=  # noqa
         (
             "Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"  # noqa
@@ -516,8 +515,8 @@ def main(args):
     model.unet_lora_layers.to(accelerator.device, dtype=torch.float32)
     model.text_encoder_lora_layers.to(accelerator.device, dtype=torch.float32)
 
-    # accelerator.register_save_state_pre_hook(save_model_hook)
-    # accelerator.register_load_state_pre_hook(load_model_hook)
+    accelerator.register_save_state_pre_hook(save_model_hook)
+    accelerator.register_load_state_pre_hook(load_model_hook)
 
     # Enable TF32 for faster training on Ampere GPUs,
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices  # noqa
@@ -610,8 +609,9 @@ def main(args):
     )
 
     # Prepare everything with our `accelerator`.
-    model, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        model, optimizer, train_dataloader, lr_scheduler)
+    _, _, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        model.unet_lora_layers, model.text_encoder_lora_layers, optimizer,
+        train_dataloader, lr_scheduler)
 
     # We need to recalculate our total training steps as the size of the
     # training dataloader may have changed.
@@ -622,10 +622,12 @@ def main(args):
     # Afterwards we recalculate our number of training epochs
     args.num_train_epochs = math.ceil(args.max_train_steps /
                                       num_update_steps_per_epoch)
-
     # Train!
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps  # noqa
     logging.info("{}".format(args).replace(', ', ',\n'))
+    logging.info(
+        f'Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}'
+    )
     logging.info("***** Running training *****")
     logging.info(f"  Num examples = {len(train_dataset)}")
     logging.info(f"  Num batches each epoch = {len(train_dataloader)}")
