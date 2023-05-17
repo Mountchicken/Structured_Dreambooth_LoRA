@@ -134,17 +134,17 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default=None,
-        required=True,
-        help=
-        "Path to pretrained model or model identifier from huggingface.co/models.",
+        default='runwayml/stable-diffusion-v1-5',
+        # required=True,
+        help=  # noqa
+        "Path to pretrained model or model identifier from huggingface.co/models.",  # noqa
     )
     parser.add_argument(
         "--revision",
         type=str,
         default=None,
         required=False,
-        help=
+        help=  # noqa
         "Revision of pretrained model identifier from huggingface.co/models.",
     )
     parser.add_argument(
@@ -156,57 +156,64 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_data_dir",
         type=str,
-        default=None,
-        required=True,
+        default='imgs/',
+        # default=None,
+        # required=True,
         help="A folder containing the training data of instance images.",
     )
     parser.add_argument(
         "--class_data_dir",
         type=str,
-        default=None,
+        # default=None,
+        default='class_images',
         required=False,
         help="A folder containing the training data of class images.",
     )
     parser.add_argument(
         "--instance_prompt",
         type=str,
-        default=None,
-        required=True,
+        default='A selfie of jianqging person',
+        # default=None,
+        # required=True,
         help="The prompt with identifier specifying the instance",
     )
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default=None,
-        help=
-        "The prompt to specify images in the same class as provided instance images.",
+        default='A selfie of a person',
+        # default=None,
+        help=  # noqa
+        "The prompt to specify images in the same class as provided instance images.",  # noqa
     )
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default=None,
-        help=
-        "A prompt that is used during validation to verify that the model is learning.",
+        default='A selfie of jianqging person as the joker from the dark knight',
+        # default=None,
+        help=  # noqa
+        "A prompt that is used during validation to verify that the model is learning.",  # noqa
     )
     parser.add_argument(
         "--num_validation_images",
         type=int,
         default=4,
-        help=
-        "Number of images that should be generated during validation with `validation_prompt`.",
+        help=  # noqa
+        "Number of images that should be generated during validation with `validation_prompt`.",  # noqa
     )
     parser.add_argument(
         "--validation_epochs",
         type=int,
-        default=50,
-        help=
-        ("Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"
-         " `args.validation_prompt` multiple times: `args.num_validation_images`."
-         ),
+        default=10,
+        help=  # noqa
+        (
+            "Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"  # noqa
+            " `args.validation_prompt` multiple times: `args.num_validation_images`."  # noqa
+        ),
     )
     parser.add_argument(
         "--with_prior_preservation",
-        default=False,
+        default=True,
+        # default=False,
         action="store_true",
         help="Flag to add prior preservation loss.",
     )
@@ -218,18 +225,20 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--num_class_images",
         type=int,
-        default=100,
-        help=
-        ("Minimal class images for prior preservation loss. If there are not enough images already present in"
-         " class_data_dir, additional images will be sampled with class_prompt."
-         ),
+        # default=100,
+        default=20,  # TODO
+        help=  # noqa
+        (
+            "Minimal class images for prior preservation loss. If there are not enough images already present in"  # noqa
+            " class_data_dir, additional images will be sampled with class_prompt."  # noqa
+        ),
     )
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="lora-dreambooth-model",
-        help=
-        "The output directory where the model predictions and checkpoints will be written.",
+        default="work_dirs",
+        help=  # noqa
+        "The output directory where the model predictions and checkpoints will be written.",  # noqa
     )
     parser.add_argument(
         "--seed",
@@ -240,104 +249,114 @@ def parse_args(input_args=None):
         "--resolution",
         type=int,
         default=512,
-        help=
-        ("The resolution for input images, all the images in the train/validation dataset will be resized to this"
-         " resolution"),
+        help=  # noqa
+        (
+            "The resolution for input images, all the images in the train/validation dataset will be resized to this"  # noqa
+            " resolution"),
     )
     parser.add_argument(
         "--center_crop",
-        default=False,
+        default=True,  # TODO
+        # default=False,
         action="store_true",
-        help=
-        ("Whether to center crop the input images to the resolution. If not set, the images will be randomly"
-         " cropped. The images will be resized to the resolution first before cropping."
-         ),
+        help=  # noqa
+        (
+            "Whether to center crop the input images to the resolution. If not set, the images will be randomly"  # noqa
+            " cropped. The images will be resized to the resolution first before cropping."  # noqa
+        ),
     )
     parser.add_argument(
         "--train_text_encoder",
+        default=True,  # TODO
         action="store_true",
-        help=
-        "Whether to train the text encoder. If set, the text encoder should be float32 precision.",
+        help=  # noqa
+        "Whether to train the text encoder. If set, the text encoder should be float32 precision.",  # noqa
     )
     parser.add_argument(
         "--train_batch_size",
         type=int,
-        default=4,
+        # default=4, # TODO
+        default=1,
         help="Batch size (per device) for the training dataloader.")
     parser.add_argument(
         "--sample_batch_size",
         type=int,
-        default=4,
+        # default=4, # TODO
+        default=1,
         help="Batch size (per device) for sampling images.")
     parser.add_argument("--num_train_epochs", type=int, default=1)
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=None,
-        help=
-        "Total number of training steps to perform.  If provided, overrides num_train_epochs.",
+        default=1200,
+        help=  # noqa
+        "Total number of training steps to perform.  If provided, overrides num_train_epochs.",  # noqa
     )
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=500,
-        help=
-        ("Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"
-         " checkpoints in case they are better than the last checkpoint, and are also suitable for resuming"
-         " training using `--resume_from_checkpoint`."),
+        default=100,
+        help=  # noqa
+        (
+            "Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"  # noqa
+            " checkpoints in case they are better than the last checkpoint, and are also suitable for resuming"  # noqa
+            " training using `--resume_from_checkpoint`."),
     )
     parser.add_argument(
         "--checkpoints_total_limit",
         type=int,
         default=None,
-        help=
-        ("Max number of checkpoints to store. Passed as `total_limit` to the `Accelerator` `ProjectConfiguration`."
-         " See Accelerator::save_state https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.save_state"
-         " for more docs"),
+        help=  # noqa
+        (
+            "Max number of checkpoints to store. Passed as `total_limit` to the `Accelerator` `ProjectConfiguration`."  # noqa
+            " See Accelerator::save_state https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.save_state"  # noqa
+            " for more docs"),
     )
     parser.add_argument(
         "--resume_from_checkpoint",
         type=str,
         default=None,
-        help=
-        ("Whether training should be resumed from a previous checkpoint. Use a path saved by"
-         ' `--checkpointing_steps`, or `"latest"` to automatically select the last available checkpoint.'
-         ),
+        help=  # noqa
+        (
+            "Whether training should be resumed from a previous checkpoint. Use a path saved by"  # noqa
+            ' `--checkpointing_steps`, or `"latest"` to automatically select the last available checkpoint.'  # noqa
+        ),
     )
     parser.add_argument(
         "--gradient_accumulation_steps",
         type=int,
         default=1,
-        help=
-        "Number of updates steps to accumulate before performing a backward/update pass.",
+        help=  # noqa
+        "Number of updates steps to accumulate before performing a backward/update pass.",  # noqa
     )
     parser.add_argument(
         "--gradient_checkpointing",
         action="store_true",
-        help=
-        "Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.",
+        help=  # noqa
+        "Whether or not to use gradient checkpointing to save memory at the expense of slower backward pass.",  # noqa
     )
     parser.add_argument(
         "--learning_rate",
         type=float,
-        default=5e-4,
-        help=
+        default=1e-4,
+        help=  # noqa
         "Initial learning rate (after the potential warmup period) to use.",
     )
     parser.add_argument(
         "--scale_lr",
         action="store_true",
         default=False,
-        help=
-        "Scale the learning rate by the number of GPUs, gradient accumulation steps, and batch size.",
+        help=  # noqa
+        "Scale the learning rate by the number of GPUs, gradient accumulation steps, and batch size.",  # noqa
     )
     parser.add_argument(
         "--lr_scheduler",
         type=str,
         default="constant",
-        help=
-        ('The scheduler type to use. Choose between ["linear", "cosine", "cosine_with_restarts", "polynomial",'
-         ' "constant", "constant_with_warmup"]'),
+        help=  # noqa
+        (
+            'The scheduler type to use. Choose between ["linear", "cosine", "cosine_with_restarts", "polynomial",'  # noqa
+            ' "constant", "constant_with_warmup"]'),
     )
     parser.add_argument(
         "--lr_warmup_steps",
@@ -348,7 +367,7 @@ def parse_args(input_args=None):
         "--lr_num_cycles",
         type=int,
         default=1,
-        help=
+        help=  # noqa
         "Number of hard resets of the lr in cosine_with_restarts scheduler.",
     )
     parser.add_argument(
@@ -360,9 +379,10 @@ def parse_args(input_args=None):
         "--dataloader_num_workers",
         type=int,
         default=0,
-        help=
-        ("Number of subprocesses to use for data loading. 0 means that the data will be loaded in the main process."
-         ),
+        help=  # noqa
+        (
+            "Number of subprocesses to use for data loading. 0 means that the data will be loaded in the main process."  # noqa
+        ),
     )
     parser.add_argument(
         "--use_8bit_adam",
@@ -403,54 +423,61 @@ def parse_args(input_args=None):
         "--hub_model_id",
         type=str,
         default=None,
-        help=
-        "The name of the repository to keep in sync with the local `output_dir`.",
+        help=  # noqa
+        "The name of the repository to keep in sync with the local `output_dir`.",  # noqa
     )
     parser.add_argument(
         "--logging_dir",
         type=str,
         default="logs",
-        help=
-        ("[TensorBoard](https://www.tensorflow.org/tensorboard) log directory. Will default to"
-         " *output_dir/runs/**CURRENT_DATETIME_HOSTNAME***."),
+        help=(
+            "[TensorBoard](https://www.tensorflow.org/tensorboard) log directory. Will default to"  # noqa
+            " *output_dir/runs/**CURRENT_DATETIME_HOSTNAME***."),
     )
     parser.add_argument(
         "--allow_tf32",
         action="store_true",
-        help=
-        ("Whether or not to allow TF32 on Ampere GPUs. Can be used to speed up training. For more information, see"
-         " https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices"
-         ),
+        default=True,  # TODO
+        help=  # noqa
+        (
+            "Whether or not to allow TF32 on Ampere GPUs. Can be used to speed up training. For more information, see"  # noqa
+            " https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices"  # noqa
+        ),
     )
     parser.add_argument(
         "--report_to",
         type=str,
         default="tensorboard",
-        help=
-        ('The integration to report the results and logs to. Supported platforms are `"tensorboard"`'
-         ' (default), `"wandb"` and `"comet_ml"`. Use `"all"` to report to all integrations.'
-         ),
+        help=  # noqa
+        (
+            'The integration to report the results and logs to. Supported platforms are `"tensorboard"`'  # noqa
+            ' (default), `"wandb"` and `"comet_ml"`. Use `"all"` to report to all integrations.'  # noqa
+        ),
     )
     parser.add_argument(
         "--mixed_precision",
         type=str,
-        default=None,
+        # default=None,
+        default='fp16',  # TODO
         choices=["no", "fp16", "bf16"],
-        help=
-        ("Whether to use mixed precision. Choose between fp16 and bf16 (bfloat16). Bf16 requires PyTorch >="
-         " 1.10.and an Nvidia Ampere GPU.  Default to the value of accelerate config of the current system or the"
-         " flag passed with the `accelerate.launch` command. Use this argument to override the accelerate config."
-         ),
+        help=  # noqa
+        (
+            "Whether to use mixed precision. Choose between fp16 and bf16 (bfloat16). Bf16 requires PyTorch >="  # noqa
+            " 1.10.and an Nvidia Ampere GPU.  Default to the value of accelerate config of the current system or the"  # noqa
+            " flag passed with the `accelerate.launch` command. Use this argument to override the accelerate config."  # noqa
+        ),
     )
     parser.add_argument(
         "--prior_generation_precision",
         type=str,
-        default=None,
+        # default=None,
+        default='fp16',  # TODO
         choices=["no", "fp32", "fp16", "bf16"],
-        help=
-        ("Choose prior generation precision between fp32, fp16 and bf16 (bfloat16). Bf16 requires PyTorch >="
-         " 1.10.and an Nvidia Ampere GPU.  Default to  fp16 if a GPU is available else fp32."
-         ),
+        help=  # noqa
+        (
+            "Choose prior generation precision between fp32, fp16 and bf16 (bfloat16). Bf16 requires PyTorch >="  # noqa
+            " 1.10.and an Nvidia Ampere GPU.  Default to  fp16 if a GPU is available else fp32."  # noqa
+        ),
     )
     parser.add_argument(
         "--local_rank",
@@ -464,16 +491,16 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pre_compute_text_embeddings",
         action="store_true",
-        help=
-        "Whether or not to pre-compute text embeddings. If text embeddings are pre-computed, the text encoder will not be kept in memory during training and will leave more GPU memory available for training the rest of the model. This is not compatible with `--train_text_encoder`.",
+        help=  # noqa
+        "Whether or not to pre-compute text embeddings. If text embeddings are pre-computed, the text encoder will not be kept in memory during training and will leave more GPU memory available for training the rest of the model. This is not compatible with `--train_text_encoder`.",  # noqa
     )
     parser.add_argument(
         "--tokenizer_max_length",
         type=int,
         default=None,
         required=False,
-        help=
-        "The maximum length of the tokenizer. If not set, will default to the tokenizer's max length.",
+        help=  # noqa
+        "The maximum length of the tokenizer. If not set, will default to the tokenizer's max length.",  # noqa
     )
     parser.add_argument(
         "--text_encoder_use_attention_mask",
@@ -501,16 +528,16 @@ def parse_args(input_args=None):
         # logger is not available yet
         if args.class_data_dir is not None:
             warnings.warn(
-                "You need not use --class_data_dir without --with_prior_preservation."
+                "You need not use --class_data_dir without --with_prior_preservation."  # noqa
             )
         if args.class_prompt is not None:
             warnings.warn(
-                "You need not use --class_prompt without --with_prior_preservation."
+                "You need not use --class_prompt without --with_prior_preservation."  # noqa
             )
 
     if args.train_text_encoder and args.pre_compute_text_embeddings:
         raise ValueError(
-            "`--train_text_encoder` cannot be used with `--pre_compute_text_embeddings`"
+            "`--train_text_encoder` cannot be used with `--pre_compute_text_embeddings`"  # noqa
         )
 
     return args
@@ -1397,6 +1424,10 @@ def main(args):
                     pipeline(**pipeline_args, generator=generator).images[0]
                     for _ in range(args.num_validation_images)
                 ]
+                for i, img in enumerate(images):
+                    img.save(
+                        f"{args.output_dir}/epoch_{epoch}_{i}.png",
+                        "PNG")
 
                 for tracker in accelerator.trackers:
                     if tracker.name == "tensorboard":

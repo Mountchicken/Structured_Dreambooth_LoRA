@@ -13,7 +13,6 @@ import torch.utils.checkpoint
 from torch.utils.tensorboard import SummaryWriter
 import transformers
 from accelerate import Accelerator
-from accelerate.logging import get_logger
 from accelerate.utils import ProjectConfiguration, set_seed
 
 from tqdm.auto import tqdm
@@ -22,12 +21,10 @@ from diffusers.optimization import get_scheduler
 
 from tools import generate_pp_images
 from models import DreamDiffusionLoRA
-from utils import compute_text_embeddings
+from utils import compute_text_embeddings, Logger
 from datasets import DreamBoothDataset, DB_collate_fn
 from engines import (train_one_epoch, validation, save_model_hook,
                      load_model_hook)
-
-logger = get_logger(__name__)
 
 
 def parse_args(input_args=None):
@@ -36,8 +33,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default=None,
-        required=True,
+        default='runwayml/stable-diffusion-v1-5',
+        # required=True,
         help=  # noqa
         "Path to pretrained model or model identifier from huggingface.co/models.",  # noqa
     )
@@ -58,35 +55,40 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_data_dir",
         type=str,
-        default=None,
-        required=True,
+        default='imgs/',
+        # default=None,
+        # required=True,
         help="A folder containing the training data of instance images.",
     )
     parser.add_argument(
         "--class_data_dir",
         type=str,
-        default=None,
+        # default=None,
+        default='class_images',
         required=False,
         help="A folder containing the training data of class images.",
     )
     parser.add_argument(
         "--instance_prompt",
         type=str,
-        default=None,
-        required=True,
+        default='A selfie of a jianqging man',
+        # default=None,
+        # required=True,
         help="The prompt with identifier specifying the instance",
     )
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default=None,
+        default='A selfie of a jianqging man',
+        # default=None,
         help=  # noqa
         "The prompt to specify images in the same class as provided instance images.",  # noqa
     )
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default=None,
+        default='A selfie of an asia man',
+        # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
     )
@@ -100,7 +102,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_epochs",
         type=int,
-        default=50,
+        default=10,
         help=  # noqa
         (
             "Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"  # noqa
@@ -109,7 +111,8 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--with_prior_preservation",
-        default=False,
+        default=True,
+        # default=False,
         action="store_true",
         help="Flag to add prior preservation loss.",
     )
@@ -121,7 +124,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--num_class_images",
         type=int,
-        default=100,
+        # default=100,
+        default=20,  # TODO
         help=  # noqa
         (
             "Minimal class images for prior preservation loss. If there are not enough images already present in"  # noqa
@@ -131,7 +135,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="lora-dreambooth-model",
+        default="work_dirs",
         help=  # noqa
         "The output directory where the model predictions and checkpoints will be written.",  # noqa
     )
@@ -151,7 +155,8 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--center_crop",
-        default=False,
+        default=True,  # TODO
+        # default=False,
         action="store_true",
         help=  # noqa
         (
@@ -161,6 +166,7 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--train_text_encoder",
+        default=True,  # TODO
         action="store_true",
         help=  # noqa
         "Whether to train the text encoder. If set, the text encoder should be float32 precision.",  # noqa
@@ -168,25 +174,27 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--train_batch_size",
         type=int,
-        default=4,
+        # default=4, # TODO
+        default=1,
         help="Batch size (per device) for the training dataloader.")
     parser.add_argument(
         "--sample_batch_size",
         type=int,
-        default=4,
+        # default=4, # TODO
+        default=1,
         help="Batch size (per device) for sampling images.")
     parser.add_argument("--num_train_epochs", type=int, default=1)
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=None,
+        default=500,
         help=  # noqa
         "Total number of training steps to perform.  If provided, overrides num_train_epochs.",  # noqa
     )
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=500,
+        default=1,
         help=  # noqa
         (
             "Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"  # noqa
@@ -229,7 +237,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--learning_rate",
         type=float,
-        default=5e-4,
+        default=1e-4,
         help=  # noqa
         "Initial learning rate (after the potential warmup period) to use.",
     )
@@ -328,6 +336,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--allow_tf32",
         action="store_true",
+        default=True,  # TODO
         help=  # noqa
         (
             "Whether or not to allow TF32 on Ampere GPUs. Can be used to speed up training. For more information, see"  # noqa
@@ -347,7 +356,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--mixed_precision",
         type=str,
-        default=None,
+        # default=None,
+        default='fp16',  # TODO
         choices=["no", "fp16", "bf16"],
         help=  # noqa
         (
@@ -359,7 +369,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--prior_generation_precision",
         type=str,
-        default=None,
+        # default=None,
+        default='fp16',  # TODO
         choices=["no", "fp32", "fp16", "bf16"],
         help=  # noqa
         (
@@ -442,17 +453,11 @@ def main(args):
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with='all',
-        project_dir=args.work_dir,
+        project_dir=args.output_dir,
         project_config=accelerator_project_config,
     )
 
-    # Make one log on every process with the configuration for debugging.
-    logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO,
-    )
-    logger.info(accelerator.state, main_process_only=False)
+    Logger.init(args.output_dir, 'log')
     if accelerator.is_local_main_process:
         transformers.utils.logging.set_verbosity_warning()
         diffusers.utils.logging.set_verbosity_info()
@@ -465,10 +470,11 @@ def main(args):
         set_seed(args.seed)
 
     # Generate class images if prior preservation is enabled.
+    logging.info("Generating class images for prior preservation.")
     if args.with_prior_preservation:
         generate_pp_images(
             accelerator=accelerator,
-            class_data_dir=args.class_data_dir,
+            class_img_root=args.class_data_dir,
             num_images=args.num_class_images,
             prompt=args.class_prompt,
             pretrained_model_name_or_path=args.pretrained_model_name_or_path,
@@ -481,6 +487,9 @@ def main(args):
     if accelerator.is_main_process:
         if args.output_dir is not None:
             os.makedirs(args.output_dir, exist_ok=True)
+            os.makedirs(
+                os.path.join(args.output_dir, 'validation_images'),
+                exist_ok=True)
     tb_writer = SummaryWriter(
         log_dir=os.path.join(args.output_dir, 'tensorboard'))
     # Define the model
@@ -503,9 +512,12 @@ def main(args):
         weight_dtype = torch.bfloat16
 
     model = model.to(accelerator.device, dtype=weight_dtype)
+    # For LoRA Layers, we need to convert them to float32
+    model.unet_lora_layers.to(accelerator.device, dtype=torch.float32)
+    model.text_encoder_lora_layers.to(accelerator.device, dtype=torch.float32)
 
-    accelerator.register_save_state_pre_hook(save_model_hook)
-    accelerator.register_load_state_pre_hook(load_model_hook)
+    # accelerator.register_save_state_pre_hook(save_model_hook)
+    # accelerator.register_load_state_pre_hook(load_model_hook)
 
     # Enable TF32 for faster training on Ampere GPUs,
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices  # noqa
@@ -554,9 +566,9 @@ def main(args):
 
     # Build Dataset and Dataloaer
     train_dataset = DreamBoothDataset(
-        instance_data_dir=args.instance_data_dir,
+        instance_data_root=args.instance_data_dir,
         instance_prompt=args.instance_prompt,
-        class_data_dir=args.class_data_dir
+        class_data_root=args.class_data_dir
         if args.with_prior_preservation else None,
         class_prompt=args.class_prompt,
         class_num=args.num_class_images,
@@ -611,27 +623,21 @@ def main(args):
     args.num_train_epochs = math.ceil(args.max_train_steps /
                                       num_update_steps_per_epoch)
 
-    # We need to initialize the trackers we use, and also store our
-    # configuration. The trackers initializes automatically on the main
-    # process.
-    if accelerator.is_main_process:
-        accelerator.init_trackers("dreambooth-lora", config=vars(args))
-
     # Train!
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps  # noqa
-
-    logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(train_dataset)}")
-    logger.info(f"  Num batches each epoch = {len(train_dataloader)}")
-    logger.info(f"  Num Epochs = {args.num_train_epochs}")
-    logger.info(
+    logging.info("{}".format(args).replace(', ', ',\n'))
+    logging.info("***** Running training *****")
+    logging.info(f"  Num examples = {len(train_dataset)}")
+    logging.info(f"  Num batches each epoch = {len(train_dataloader)}")
+    logging.info(f"  Num Epochs = {args.num_train_epochs}")
+    logging.info(
         f"  Instantaneous batch size per device = {args.train_batch_size}")
-    logger.info(
+    logging.info(
         f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}"  # noqa
     )
-    logger.info(
+    logging.info(
         f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
-    logger.info(f"  Total optimization steps = {args.max_train_steps}")
+    logging.info(f"  Total optimization steps = {args.max_train_steps}")
     global_step = 0
     first_epoch = 0
 
@@ -660,20 +666,20 @@ def main(args):
             first_epoch = global_step // num_update_steps_per_epoch
             resume_step = resume_global_step % (
                 num_update_steps_per_epoch * args.gradient_accumulation_steps)
-
+    else:
+        resume_step = 0
     # Only show the progress bar once on each machine.
     progress_bar = tqdm(
         range(global_step, args.max_train_steps),
         disable=not accelerator.is_local_main_process)
     progress_bar.set_description("Steps")
     for epoch in range(first_epoch, args.num_train_epochs):
-        train_one_epoch(
+        global_step = train_one_epoch(
             accelerator=accelerator,
             model=model,
             train_dataloader=train_dataloader,
             optimizer=optimizer,
             lr_scheduler=lr_scheduler,
-            logger=logger,
             tb_writer=tb_writer,
             epoch=epoch,
             first_epoch=first_epoch,
@@ -685,7 +691,7 @@ def main(args):
         )
         if accelerator.is_main_process:
             if args.validation_prompt is not None and epoch % args.validation_epochs == 0:  # noqa
-                logger.info(
+                logging.info(
                     f"Running validation... \n Generating {args.num_validation_images} images with prompt:"  # noqa
                     f" {args.validation_prompt}.")
                 validation(
@@ -699,3 +705,8 @@ def main(args):
                     validation_prompt_encoder_hidden_states,
                     validation_prompt_negative_prompt_embeds=  # noqa
                     validation_prompt_negative_prompt_embeds)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)

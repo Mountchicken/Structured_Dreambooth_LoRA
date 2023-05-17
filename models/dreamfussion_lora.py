@@ -6,7 +6,7 @@ from diffusers import (AutoencoderKL, DDPMScheduler, UNet2DConditionModel,
 from diffusers.models.attention_processor import (
     AttnAddedKVProcessor,
     AttnAddedKVProcessor2_0,
-    LoRAXFormersAttnProcessor,
+    LoRAAttnAddedKVProcessor,
     LoRAAttnProcessor,
     SlicedAttnAddedKVProcessor,
 )
@@ -216,7 +216,7 @@ class DreamDiffusionLoRA(nn.Module):
             if isinstance(attn_processor,
                           (AttnAddedKVProcessor, SlicedAttnAddedKVProcessor,
                            AttnAddedKVProcessor2_0)):
-                lora_attn_processor_class = LoRAXFormersAttnProcessor
+                lora_attn_processor_class = LoRAAttnAddedKVProcessor
             else:
                 lora_attn_processor_class = LoRAAttnProcessor
 
@@ -225,6 +225,7 @@ class DreamDiffusionLoRA(nn.Module):
                 cross_attention_dim=cross_attention_dim)
         self.unet.set_attn_processor(unet_lora_attn_procs)
         self.unet_lora_layers = AttnProcsLayers(self.unet.attn_processors)
+        self.unet_lora_layers.train()
 
     def _set_text_encoder_lora_layers(self) -> None:
         """Initialize LoRA layers for text encoder."""
@@ -245,6 +246,7 @@ class DreamDiffusionLoRA(nn.Module):
         del temp_pipeline
 
         self.text_encoder_lora_layers = text_encoder_lora_layers
+        self.text_encoder_lora_layers.train()
 
     def _set_xformers(self) -> None:
         """Initialize XFormers for faster attention computation."""

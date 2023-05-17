@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from accelerate import Accelerator
 from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler
 
@@ -27,7 +28,7 @@ def validation(model: torch.nn.Module,
             negative prompt embeddings. Defaults to None.
     """
     pipeline = DiffusionPipeline.from_pretrained(
-        args.diffusion_model_name_or_path,
+        args.pretrained_model_name_or_path,
         unet=accelerator.unwrap_model(model.unet),
         text_encoder=None if args.pre_compute_text_embeddings else
         accelerator.unwrap_model(model.text_encoder),
@@ -67,10 +68,13 @@ def validation(model: torch.nn.Module,
         pipeline(**pipeline_args, generator=generator).images[0]
         for _ in range(args.num_validation_images)
     ]
-
+    # save images to file
+    for i, img in enumerate(images):
+        img.save(f"{args.output_dir}/validation_images/epoch_{epoch}_{i}.png",
+                 "PNG")
     # stack images and write to tensorboard
-    images = torch.stack(images)
-    images = images.clamp(0, 1)
-    tb_writer.add_images("validation_images", images, epoch)
+    np_images = np.stack([np.asarray(img) for img in images])
+    tb_writer.add_images(
+        "validation_images", np_images, epoch, dataformats="NHWC")
     del pipeline
     torch.cuda.empty_cache()

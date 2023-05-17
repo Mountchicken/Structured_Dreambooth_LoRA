@@ -5,20 +5,19 @@ import itertools
 from tqdm import tqdm
 from accelerate import Accelerator
 from utils import encode_prompt
-from typing import List
 
 from diffusers import DiffusionPipeline
 from diffusers.loaders import LoraLoaderMixin, AttnProcsLayers
 
 
-def save_model_hook(accelerator: Accelerator, models: List[torch.nn.Module],
-                    weights, output_dir: str, args):
+def save_model_hook(accelerator: Accelerator, model: torch.nn.Module, weights,
+                    output_dir: str, args):
     """Custom saving hook so that `accelerator.save_state(...)` serializes in a
     nice format.
 
     Args:
         accelerator (Accelerator): The accelerator to be used.
-        models (list): The models to be saved.
+        model (torch.nn.Module): model to be saved.
         weights (list): The weights to be saved.
         output_dir (str): The output directory.
     """
@@ -28,27 +27,13 @@ def save_model_hook(accelerator: Accelerator, models: List[torch.nn.Module],
     text_encoder_lora_layers_to_save = None
 
     if args.train_text_encoder:
-        text_encoder_keys = accelerator.unwrap_model(
-            models[0].text_encoder_lora_layers).state_dict().keys()
-    unet_keys = accelerator.unwrap_model(
-        models[0].unet_lora_layers).state_dict().keys()
-
-    for model in models:
         state_dict = model.state_dict()
-
-        if (model.text_encoder_lora_layers is not None
-                and text_encoder_keys is not None
-                and state_dict.keys() == text_encoder_keys):
-            # text encoder
-            text_encoder_lora_layers_to_save = state_dict
-        elif state_dict.keys() == unet_keys:
-            # unet
-            unet_lora_layers_to_save = state_dict
-
+        text_encoder_lora_layers_to_save = state_dict[
+            'text_encoder_lora_layers']  # noqa
+        unet_lora_layers_to_save = state_dict['unet_lora_layers']
         # make sure to pop weight so that corresponding model is not saved
         # again
         weights.pop()
-
     LoraLoaderMixin.save_lora_weights(
         output_dir,
         unet_lora_layers=unet_lora_layers_to_save,
@@ -87,7 +72,6 @@ def train_one_epoch(accelerator: Accelerator, model: torch.nn.Module,
                     train_dataloader: torch.utils.data.DataLoader,
                     optimizer: torch.optim.Optimizer,
                     lr_scheduler: torch.optim.lr_scheduler,
-                    logger: logging.Logger,
                     tb_writer: torch.utils.tensorboard.SummaryWriter,
                     epoch: int, first_epoch: int, resume_step: int,
                     global_step: int, progress_bar: tqdm, args: dict,
@@ -104,7 +88,6 @@ def train_one_epoch(accelerator: Accelerator, model: torch.nn.Module,
             training.
         lr_scheduler (torch.optim.lr_scheduler): The learning rate scheduler to
             be used for training.
-        logger (logging.Logger): The logger to be used for logging.
         tb_writer (torch.utils.tensorboard.SummaryWriter): The tensorboard
             writer to be used for logging.
         epoch (int): The current epoch.
@@ -164,17 +147,25 @@ def train_one_epoch(accelerator: Accelerator, model: torch.nn.Module,
                     save_path = os.path.join(args.output_dir,
                                              f"checkpoint-{global_step}")
                     accelerator.save_state(save_path)
-                    logger.info(f"Saved state to {save_path}")
-
+                    logging.info(f"Saved state to {save_path}")
+            memory_mb = int(torch.cuda.max_memory_allocated() /
+                            (1024.0 * 1024.0))
+            log_info = f'Epoch: {epoch}/{args.num_train_epochs}' + \
+                       f' | Step: {global_step}/{args.max_train_steps}' + \
+                       f' | Loss: {loss.detach().item():.5f}' + \
+                       f' | LR: {lr_scheduler.get_last_lr()[0]:.8f}' + \
+                       f' | Memory: {memory_mb}MiB'
+            logging.info(log_info)
         logs = {
-            "loss": loss.detach().item(),
-            "lr": lr_scheduler.get_last_lr()[0]
+            "loss": f'{loss.detach().item():.5f}',
+            "lr": f'{lr_scheduler.get_last_lr()[0]:.8f}',
+            "memory": memory_mb,
         }
         progress_bar.set_postfix(**logs)
-        accelerator.log(logs, step=global_step)
         tb_writer.add_scalar(
             "lr", lr_scheduler.get_last_lr()[0], global_step=global_step)
         tb_writer.add_scalar(
             "loss", loss.detach().item(), global_step=global_step)
         if global_step >= args.max_train_steps:
             break
+    return global_step

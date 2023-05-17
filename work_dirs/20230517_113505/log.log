@@ -1,0 +1,164 @@
+[2023-05-17 11:35:05,632 main.py:473 INFO log] Generating class images for prior preservation.
+[2023-05-17 11:35:17,823 main.py:628 INFO log] Namespace(adam_beta1=0.9,
+adam_beta2=0.999,
+adam_epsilon=1e-08,
+adam_weight_decay=0.01,
+allow_tf32=True,
+center_crop=True,
+checkpointing_steps=100,
+checkpoints_total_limit=None,
+class_data_dir='class_images',
+class_prompt='A selfie of a jianqging man',
+dataloader_num_workers=0,
+enable_xformers_memory_efficient_attention=False,
+gradient_accumulation_steps=1,
+gradient_checkpointing=False,
+hub_model_id=None,
+hub_token=None,
+instance_data_dir='imgs/',
+instance_prompt='A selfie of a jianqging man',
+learning_rate=0.0001,
+local_rank=-1,
+logging_dir='logs',
+lr_num_cycles=1,
+lr_power=1.0,
+lr_scheduler='constant',
+lr_warmup_steps=500,
+max_grad_norm=1.0,
+max_train_steps=500,
+mixed_precision='fp16',
+num_class_images=20,
+num_train_epochs=25,
+num_validation_images=4,
+output_dir='work_dirs/20230517_113505',
+pre_compute_text_embeddings=False,
+pretrained_model_name_or_path='runwayml/stable-diffusion-v1-5',
+prior_generation_precision='fp16',
+prior_loss_weight=1.0,
+push_to_hub=False,
+report_to='tensorboard',
+resolution=512,
+resume_from_checkpoint=None,
+revision=None,
+sample_batch_size=1,
+scale_lr=False,
+seed=None,
+text_encoder_use_attention_mask=False,
+tokenizer_max_length=None,
+tokenizer_name=None,
+train_batch_size=1,
+train_text_encoder=True,
+use_8bit_adam=False,
+validation_epochs=10,
+validation_prompt='A selfie of an asia man',
+with_prior_preservation=True)
+[2023-05-17 11:35:17,823 main.py:629 INFO log] ***** Running training *****
+[2023-05-17 11:35:17,823 main.py:630 INFO log]   Num examples = 20
+[2023-05-17 11:35:17,823 main.py:631 INFO log]   Num batches each epoch = 20
+[2023-05-17 11:35:17,823 main.py:632 INFO log]   Num Epochs = 25
+[2023-05-17 11:35:17,823 main.py:633 INFO log]   Instantaneous batch size per device = 1
+[2023-05-17 11:35:17,823 main.py:635 INFO log]   Total train batch size (w. parallel, distributed & accumulation) = 1
+[2023-05-17 11:35:17,823 main.py:638 INFO log]   Gradient Accumulation steps = 1
+[2023-05-17 11:35:17,823 main.py:640 INFO log]   Total optimization steps = 500
+[2023-05-17 11:35:21,234 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 1/500 | Loss: 0.24505 | LR: 0.00010000 | Memory: 14515MiB
+[2023-05-17 11:35:21,605 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 2/500 | Loss: 0.24397 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:21,972 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 3/500 | Loss: 0.41355 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:22,340 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 4/500 | Loss: 0.42738 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:22,708 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 5/500 | Loss: 0.42645 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:23,074 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 6/500 | Loss: 0.74100 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:23,442 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 7/500 | Loss: 0.45609 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:23,809 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 8/500 | Loss: 0.73241 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:24,176 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 9/500 | Loss: 0.27470 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:24,544 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 10/500 | Loss: 0.27241 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:24,911 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 11/500 | Loss: 0.20692 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:25,277 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 12/500 | Loss: 0.13900 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:25,644 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 13/500 | Loss: 0.26963 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:26,011 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 14/500 | Loss: 0.01976 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:26,378 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 15/500 | Loss: 0.07219 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:26,746 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 16/500 | Loss: 0.40677 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:27,114 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 17/500 | Loss: 0.10215 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:27,482 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 18/500 | Loss: 0.46834 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:27,850 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 19/500 | Loss: 0.51451 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:28,204 engine_train.py:173 INFO log] Epoch: 0/25 | Step: 20/500 | Loss: 0.21330 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:28,206 main.py:694 INFO log] Running validation... 
+ Generating 4 images with prompt: A selfie of an asia man.
+[2023-05-17 11:35:46,778 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 21/500 | Loss: 0.21542 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:47,147 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 22/500 | Loss: 0.48857 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:47,517 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 23/500 | Loss: 0.45304 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:47,887 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 24/500 | Loss: 0.85325 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:48,257 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 25/500 | Loss: 0.05132 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:48,626 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 26/500 | Loss: 0.11673 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:48,995 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 27/500 | Loss: 0.06549 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:49,364 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 28/500 | Loss: 0.23919 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:49,732 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 29/500 | Loss: 0.49905 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:50,101 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 30/500 | Loss: 0.25974 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:50,471 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 31/500 | Loss: 0.25138 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:50,840 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 32/500 | Loss: 0.16937 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:51,209 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 33/500 | Loss: 0.32527 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:51,579 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 34/500 | Loss: 0.22915 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:51,948 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 35/500 | Loss: 0.20597 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:52,318 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 36/500 | Loss: 0.07246 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:52,686 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 37/500 | Loss: 0.56178 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:53,056 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 38/500 | Loss: 0.01861 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:53,425 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 39/500 | Loss: 0.05932 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:53,779 engine_train.py:173 INFO log] Epoch: 1/25 | Step: 40/500 | Loss: 0.45719 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:54,168 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 41/500 | Loss: 0.13821 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:54,538 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 42/500 | Loss: 0.07237 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:54,907 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 43/500 | Loss: 0.21200 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:55,278 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 44/500 | Loss: 0.01036 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:55,647 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 45/500 | Loss: 0.02998 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:56,017 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 46/500 | Loss: 0.36151 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:56,386 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 47/500 | Loss: 0.72550 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:56,756 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 48/500 | Loss: 0.01136 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:57,125 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 49/500 | Loss: 0.41152 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:57,495 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 50/500 | Loss: 0.03074 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:57,865 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 51/500 | Loss: 0.64960 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:58,235 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 52/500 | Loss: 0.04252 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:58,604 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 53/500 | Loss: 0.04156 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:58,974 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 54/500 | Loss: 0.18785 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:59,343 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 55/500 | Loss: 0.67081 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:35:59,713 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 56/500 | Loss: 1.00732 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:00,084 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 57/500 | Loss: 0.14298 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:00,454 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 58/500 | Loss: 0.51313 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:00,824 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 59/500 | Loss: 0.01228 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:01,178 engine_train.py:173 INFO log] Epoch: 2/25 | Step: 60/500 | Loss: 0.12742 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:01,568 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 61/500 | Loss: 0.01361 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:01,938 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 62/500 | Loss: 0.21992 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:02,307 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 63/500 | Loss: 1.01273 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:02,676 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 64/500 | Loss: 0.62545 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:03,045 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 65/500 | Loss: 0.00683 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:03,416 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 66/500 | Loss: 0.02233 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:03,787 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 67/500 | Loss: 0.04323 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:04,157 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 68/500 | Loss: 0.09670 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:04,527 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 69/500 | Loss: 0.35818 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:04,897 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 70/500 | Loss: 0.18807 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:05,267 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 71/500 | Loss: 0.11654 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:05,637 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 72/500 | Loss: 0.04486 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:06,007 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 73/500 | Loss: 0.17815 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:06,377 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 74/500 | Loss: 0.05722 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:06,747 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 75/500 | Loss: 0.58525 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:07,117 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 76/500 | Loss: 0.26385 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:07,487 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 77/500 | Loss: 0.32770 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:07,858 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 78/500 | Loss: 0.05618 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:08,227 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 79/500 | Loss: 0.04163 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:08,581 engine_train.py:173 INFO log] Epoch: 3/25 | Step: 80/500 | Loss: 0.18594 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:08,971 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 81/500 | Loss: 0.42902 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:09,340 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 82/500 | Loss: 0.24321 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:09,712 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 83/500 | Loss: 0.04166 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:10,082 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 84/500 | Loss: 0.31620 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:10,452 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 85/500 | Loss: 0.16603 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:10,822 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 86/500 | Loss: 0.38192 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:11,192 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 87/500 | Loss: 0.31223 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:11,561 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 88/500 | Loss: 0.08177 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:11,932 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 89/500 | Loss: 0.48290 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:12,302 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 90/500 | Loss: 0.27497 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:12,672 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 91/500 | Loss: 0.09408 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:13,042 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 92/500 | Loss: 0.07457 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:13,413 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 93/500 | Loss: 0.36601 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:13,784 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 94/500 | Loss: 0.17267 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:14,155 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 95/500 | Loss: 0.08008 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:14,524 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 96/500 | Loss: 0.53534 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:14,895 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 97/500 | Loss: 0.08728 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:15,265 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 98/500 | Loss: 0.02203 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:15,636 engine_train.py:173 INFO log] Epoch: 4/25 | Step: 99/500 | Loss: 0.57680 | LR: 0.00010000 | Memory: 14526MiB
+[2023-05-17 11:36:15,991 logging.py:47 INFO log] Saving current state to work_dirs/20230517_113505/checkpoint-100
