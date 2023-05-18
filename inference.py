@@ -1,7 +1,7 @@
 import argparse
 import os
 import torch
-from diffusers import DiffusionPipeline, DPMSolverMultistepScheduler, DDIMScheduler
+from diffusers import DiffusionPipeline, DDIMScheduler
 
 
 def parse_args():
@@ -17,8 +17,7 @@ def parse_args():
     parser.add_argument(
         "--checkpoint_dir",
         type=str,
-        default=
-        'work_dirs/test_peroson/no_prior_no_train_text_lr_2e-4/20230518_143106/checkpoint-1050',
+        required=True,
         help="Path to checkpoint directory.")
     parser.add_argument(
         "--mixed_precision",
@@ -34,7 +33,7 @@ def parse_args():
     parser.add_argument(
         "--prompt",
         type=str,
-        default='a photo of a sks person taking selfie at eiffel tower',  # noqa
+        required=True,
         help="prompt used for generation",
     )
     parser.add_argument(
@@ -51,8 +50,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default=
-        "work_dirs/test_person/no_prior_no_train_text_lr_2e-4/inference_600EP_apple",
+        default="work_dirs/inference",
         help="The output directory where the generated image will be saved.",
     )
     parser.add_argument(
@@ -91,8 +89,8 @@ if __name__ == '__main__':
 
         scheduler_args["variance_type"] = variance_type
 
-    pipeline.scheduler = DDIMScheduler.from_config(
-        pipeline.scheduler.config, **scheduler_args)
+    pipeline.scheduler = DDIMScheduler.from_config(pipeline.scheduler.config,
+                                                   **scheduler_args)
 
     pipeline = pipeline.to(args.device)
 
