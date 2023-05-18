@@ -91,6 +91,6 @@ After training, you can use the following command to generate images from a prom
 
 
 
-## Reference
+## Aknowledgements
 - [Training Stable Diffusion with Dreambooth using 🧨 Diffusers](https://huggingface.co/blog/dreambooth)
 - [diffusers/examples/dreambooth/train_dreambooth_lora.py](https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora.py)
