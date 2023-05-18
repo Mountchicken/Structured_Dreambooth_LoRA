@@ -34,7 +34,6 @@ def parse_args(input_args=None):
         "--pretrained_model_name_or_path",
         type=str,
         default='runwayml/stable-diffusion-v1-5',
-        # required=True,
         help=  # noqa
         "Path to pretrained model or model identifier from huggingface.co/models.",  # noqa
     )
@@ -68,21 +67,19 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_prompt",
         type=str,
-        default='A photo of a sks dog',
         required=True,
         help="The prompt with identifier specifying the instance",
     )
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default='A photo of a dog',
         help=  # noqa
         "The prompt to specify images in the same class as provided instance images.",  # noqa
     )
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default='A photo of a sks person swimming',
+        required=True,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
     )
@@ -105,8 +102,6 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--with_prior_preservation",
-        default=False,
-        # default=False,
         action="store_true",
         help="Flag to add prior preservation loss.",
     )
