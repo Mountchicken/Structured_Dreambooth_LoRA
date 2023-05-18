@@ -85,7 +85,7 @@ After training, you can use the following command to generate images from a prom
   accelerate launch main.py \
   --pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5" \
   --checkpoint_dir=$CHECKPOINT_DIR \
-  --prompt="PROMPT" \
+  --prompt=$PROMPT \
   --output_dir=$OUTPUT_DIR
   ```
 
