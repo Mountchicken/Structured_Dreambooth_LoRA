@@ -55,7 +55,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_data_dir",
         type=str,
-        default='imgs/',
+        default='imgs/person',
         # default=None,
         # required=True,
         help="A folder containing the training data of instance images.",
@@ -71,7 +71,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_prompt",
         type=str,
-        default='A selfie of a jianqging man',
+        default='A photo of a sks person',
         # default=None,
         # required=True,
         help="The prompt with identifier specifying the instance",
@@ -79,7 +79,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default='A selfie of a man',
+        default='A photo of a person',
         # default=None,
         help=  # noqa
         "The prompt to specify images in the same class as provided instance images.",  # noqa
@@ -87,8 +87,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default=
-        'A selfie of a jianqging man on the Great Wall of China, taken in the summer, with a smile, wearing a hat and sunglasses',
+        default='A photo of a sks person swimming',
         # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
@@ -103,7 +102,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_epochs",
         type=int,
-        default=10,
+        default=4,
         help=  # noqa
         (
             "Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"  # noqa
@@ -112,8 +111,8 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--with_prior_preservation",
-        # default=True,
         default=False,
+        # default=False,
         action="store_true",
         help="Flag to add prior preservation loss.",
     )
@@ -125,7 +124,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--num_class_images",
         type=int,
-        default=100,
+        default=40,
         help=  # noqa
         (
             "Minimal class images for prior preservation loss. If there are not enough images already present in"  # noqa
@@ -166,7 +165,7 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--train_text_encoder",
-        default=True,  # TODO
+        default=False,  # TODO
         action="store_true",
         help=  # noqa
         "Whether to train the text encoder. If set, the text encoder should be float32 precision.",  # noqa
@@ -187,14 +186,14 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=800,
+        default=1200,
         help=  # noqa
         "Total number of training steps to perform.  If provided, overrides num_train_epochs.",  # noqa
     )
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=200,
+        default=50,
         help=  # noqa
         (
             "Save a checkpoint of the training state every X updates. These checkpoints can be used both as final"  # noqa
@@ -514,7 +513,9 @@ def main(args):
     model = model.to(accelerator.device, dtype=weight_dtype)
     # For LoRA Layers, we need to convert them to float32
     model.unet_lora_layers.to(accelerator.device, dtype=torch.float32)
-    model.text_encoder_lora_layers.to(accelerator.device, dtype=torch.float32)
+    if args.train_text_encoder:
+        model.text_encoder_lora_layers.to(
+            accelerator.device, dtype=torch.float32)
 
     accelerator.register_save_state_pre_hook(save_model_hook)
     accelerator.register_load_state_pre_hook(load_model_hook)
@@ -610,9 +611,13 @@ def main(args):
     )
 
     # Prepare everything with our `accelerator`.
-    _, _, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        model.unet_lora_layers, model.text_encoder_lora_layers, optimizer,
-        train_dataloader, lr_scheduler)
+    if args.train_text_encoder:
+        _, _, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+            model.unet_lora_layers, model.text_encoder_lora_layers, optimizer,
+            train_dataloader, lr_scheduler)
+    else:
+        _, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+            model.unet_lora_layers, optimizer, train_dataloader, lr_scheduler)
 
     # We need to recalculate our total training steps as the size of the
     # training dataloader may have changed.
@@ -702,6 +707,7 @@ def main(args):
                     accelerator=accelerator,
                     weight_dtype=weight_dtype,
                     epoch=epoch,
+                    global_step=global_step,
                     tb_writer=tb_writer,
                     args=args,
                     validation_prompt_encoder_hidden_states=  # noqa

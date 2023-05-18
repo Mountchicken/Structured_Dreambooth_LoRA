@@ -8,6 +8,7 @@ def validation(model: torch.nn.Module,
                accelerator: Accelerator,
                weight_dtype: torch.dtype,
                epoch: int,
+               global_step: int,
                tb_writer: torch.utils.tensorboard.SummaryWriter,
                args: dict,
                validation_prompt_encoder_hidden_states=None,
@@ -19,6 +20,7 @@ def validation(model: torch.nn.Module,
         accelerator (Accelerator): The accelerator to be used.
         weight_dtype (torch.dtype): The dtype of the model weights.
         epoch (int): The current epoch.
+        global_step (int): The current global step.
         tb_writer (torch.utils.tensorboard.SummaryWriter): The tensorboard
             writer.
         args (dict): The arguments.
@@ -70,11 +72,11 @@ def validation(model: torch.nn.Module,
     ]
     # save images to file
     for i, img in enumerate(images):
-        img.save(f"{args.output_dir}/validation_images/epoch_{epoch}_{i}.png",
+        img.save(f"{args.output_dir}/validation_images/step_{global_step}_{i}.png",
                  "PNG")
     # stack images and write to tensorboard
     np_images = np.stack([np.asarray(img) for img in images])
     tb_writer.add_images(
-        "validation_images", np_images, epoch, dataformats="NHWC")
+        "validation_images", np_images, global_step, dataformats="NHWC")
     del pipeline
     torch.cuda.empty_cache()

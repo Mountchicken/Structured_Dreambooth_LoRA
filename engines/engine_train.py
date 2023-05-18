@@ -10,8 +10,7 @@ from diffusers import DiffusionPipeline
 from diffusers.loaders import LoraLoaderMixin, AttnProcsLayers
 
 
-def save_model_hook(models: torch.nn.Module, weights,
-                    output_dir: str):
+def save_model_hook(models: torch.nn.Module, weights, output_dir: str):
     """Custom saving hook so that `accelerator.save_state(...)` serializes in a
     nice format.
 
@@ -25,12 +24,17 @@ def save_model_hook(models: torch.nn.Module, weights,
     # or there are the unet and text encoder atten layers
     unet_lora_layers_to_save = None
     text_encoder_lora_layers_to_save = None
+    if len(models) > 1:
+        with_text_encoder = True
+    else:
+        with_text_encoder = False
 
     unet_lora_layers = models[0]
-    text_encoder_lora_layers = models[1]
-
-    text_encoder_keys = text_encoder_lora_layers.state_dict().keys()
     unet_keys = unet_lora_layers.state_dict().keys()
+
+    text_encoder_lora_layers = models[1] if with_text_encoder else None
+    text_encoder_keys = text_encoder_lora_layers.state_dict().keys(
+    ) if with_text_encoder else None
 
     for model in models:
         state_dict = model.state_dict()
