@@ -87,7 +87,8 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_prompt",
         type=str,
-        default='A selfie of a jianqging man',
+        default=
+        'A selfie of a jianqging man on the Great Wall of China, taken in the summer, with a smile, wearing a hat and sunglasses',
         # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
@@ -102,7 +103,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--validation_epochs",
         type=int,
-        default=1,
+        default=10,
         help=  # noqa
         (
             "Run dreambooth validation every X epochs. Dreambooth validation consists of running the prompt"  # noqa
@@ -111,8 +112,8 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--with_prior_preservation",
-        default=True,
-        # default=False,
+        # default=True,
+        default=False,
         action="store_true",
         help="Flag to add prior preservation loss.",
     )
@@ -236,7 +237,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--learning_rate",
         type=float,
-        default=1e-4,
+        default=2e-4,
         help=  # noqa
         "Initial learning rate (after the potential warmup period) to use.",
     )
