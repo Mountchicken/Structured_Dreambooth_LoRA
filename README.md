@@ -80,12 +80,16 @@ You can aslo fine-tune the text encoder (CLIP) with LoRA. However we find this l
   ```
 
 ## 4.Inference
-After training, you can use the following command to generate images from a prompt.
+After training, you can use the following command to generate images from a prompt. We also provide a pretrained checkpoint for dog (in the example)
+  ```bash
+  wget https://github.com/Mountchicken/Structured_Dreambooth_LoRA/releases/download/checkpoint_dog/checkpoint-200.zip
+  unzip -q checkpoint-200.zip
+  ```
  ```bash
   accelerate launch main.py \
   --pretrained_model_name_or_path="runwayml/stable-diffusion-v1-5" \
-  --checkpoint_dir=$CHECKPOINT_DIR \
-  --prompt=$PROMPT \
+  --checkpoint_dir="checkpoint-200" \
+  --prompt="A photo of sks dog is swimming \
   --output_dir=$OUTPUT_DIR
   ```
 
