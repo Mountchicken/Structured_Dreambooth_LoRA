@@ -20,8 +20,8 @@ def save_model_hook(models: torch.nn.Module, weights, output_dir: str):
         weights (list): The weights to be saved.
         output_dir (str): The output directory.
     """
-    # there are only two options here. Either are just the unet attn processor layers
-    # or there are the unet and text encoder atten layers
+    # there are only two options here. Either are just the unet attn processor
+    # layers or there are the unet and text encoder atten layers
     unet_lora_layers_to_save = None
     text_encoder_lora_layers_to_save = None
     if len(models) > 1:
@@ -48,7 +48,8 @@ def save_model_hook(models: torch.nn.Module, weights, output_dir: str):
             # unet
             unet_lora_layers_to_save = state_dict
 
-        # make sure to pop weight so that corresponding model is not saved again
+        # make sure to pop weight so that corresponding model is not saved
+        # again
         weights.pop()
 
     LoraLoaderMixin.save_lora_weights(

@@ -55,15 +55,12 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_data_dir",
         type=str,
-        default='imgs/person',
-        # default=None,
-        # required=True,
+        required=True,
         help="A folder containing the training data of instance images.",
     )
     parser.add_argument(
         "--class_data_dir",
         type=str,
-        # default=None,
         default='class_images',
         required=False,
         help="A folder containing the training data of class images.",
@@ -71,16 +68,14 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--instance_prompt",
         type=str,
-        default='A photo of a sks person',
-        # default=None,
-        # required=True,
+        default='A photo of a sks dog',
+        required=True,
         help="The prompt with identifier specifying the instance",
     )
     parser.add_argument(
         "--class_prompt",
         type=str,
-        default='A photo of a person',
-        # default=None,
+        default='A photo of a dog',
         help=  # noqa
         "The prompt to specify images in the same class as provided instance images.",  # noqa
     )
@@ -88,7 +83,6 @@ def parse_args(input_args=None):
         "--validation_prompt",
         type=str,
         default='A photo of a sks person swimming',
-        # default=None,
         help=  # noqa
         "A prompt that is used during validation to verify that the model is learning.",  # noqa
     )
@@ -154,8 +148,6 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--center_crop",
-        default=True,  # TODO
-        # default=False,
         action="store_true",
         help=  # noqa
         (
@@ -165,7 +157,6 @@ def parse_args(input_args=None):
     )
     parser.add_argument(
         "--train_text_encoder",
-        default=False,  # TODO
         action="store_true",
         help=  # noqa
         "Whether to train the text encoder. If set, the text encoder should be float32 precision.",  # noqa
@@ -173,20 +164,18 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--train_batch_size",
         type=int,
-        # default=4, # TODO
         default=1,
         help="Batch size (per device) for the training dataloader.")
     parser.add_argument(
         "--sample_batch_size",
         type=int,
-        # default=4, # TODO
         default=1,
         help="Batch size (per device) for sampling images.")
     parser.add_argument("--num_train_epochs", type=int, default=1)
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=1200,
+        default=400,
         help=  # noqa
         "Total number of training steps to perform.  If provided, overrides num_train_epochs.",  # noqa
     )
@@ -335,7 +324,6 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--allow_tf32",
         action="store_true",
-        default=True,  # TODO
         help=  # noqa
         (
             "Whether or not to allow TF32 on Ampere GPUs. Can be used to speed up training. For more information, see"  # noqa
@@ -355,8 +343,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--mixed_precision",
         type=str,
-        # default=None,
-        default='fp16',  # TODO
+        default='fp16',
         choices=["no", "fp16", "bf16"],
         help=  # noqa
         (
@@ -368,8 +355,7 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--prior_generation_precision",
         type=str,
-        # default=None,
-        default='fp16',  # TODO
+        default='fp16',
         choices=["no", "fp32", "fp16", "bf16"],
         help=  # noqa
         (
@@ -632,7 +618,7 @@ def main(args):
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps  # noqa
     logging.info("{}".format(args).replace(', ', ',\n'))
     logging.info(
-        f'Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}'
+        f'Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad)}'  # noqa
     )
     logging.info("***** Running training *****")
     logging.info(f"  Num examples = {len(train_dataset)}")
